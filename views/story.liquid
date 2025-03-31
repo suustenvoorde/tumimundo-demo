@@ -1,0 +1,19 @@
+{% render 'partials/head.liquid' %}
+
+<h1>{{ story.title }}</h1>
+<audio crossorigin="anonymous" controls src="https://fdnd-agency.directus.app/assets/{{ story.audio[0].audio_file }}">
+  <track
+  default
+  src="https://fdnd-agency.directus.app/assets/{{ story.audio[0].transcript_file }}" />
+
+</audio>
+
+<p></p>
+
+<script type="module">
+  document.querySelector('track').addEventListener('cuechange', function(ev) {
+    document.querySelector('p').textContent = ev.target.track.activeCues[0].text
+  })
+</script>
+
+{% render 'partials/foot.liquid' %}

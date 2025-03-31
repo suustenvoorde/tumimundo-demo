@@ -1,0 +1,23 @@
+{% render 'partials/head.liquid' %}
+
+    <div id="stories">
+      <div>
+      {%for story in stories%}
+        <a href="/stories/{{story.id}}">
+            <img src="https://fdnd-agency.directus.app/assets//{{ story.image }}">
+            <p>{{ story.title }}</p>
+            {% if story.liked %}
+              <form method="post" action="/unlike">
+                <button type="submit" name="story" value="{{ story.id }}">Unlike 💔</button>
+              </form> 
+            {% else %} 
+              <form method="post" action="/like">
+                <button type="submit" name="story" value="{{ story.id }}">Like ❤️</button>
+              </form> 
+            {% endif %}
+        </a>
+      {% endfor %}
+      </div>
+    </div>
+
+{% render 'partials/foot.liquid' %}
