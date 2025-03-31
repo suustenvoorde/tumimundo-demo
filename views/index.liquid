@@ -6,7 +6,7 @@
         <a href="/stories/{{story.id}}">
             <img src="https://fdnd-agency.directus.app/assets//{{ story.image }}">
             <p>{{ story.title }}</p>
-            {% comment %} {% if story.liked %} {% endcomment %}
+
             {% if likes contains story.id %}
               <form method="post" action="/unlike">
                 <button type="submit" name="story" value="{{ story.id }}">Unlike 💔</button>
@@ -16,6 +16,7 @@
                 <button type="submit" name="story" value="{{ story.id }}">Like ❤️</button>
               </form> 
             {% endif %}
+            
         </a>
       {% endfor %}
       </div>
