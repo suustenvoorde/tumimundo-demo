@@ -24,13 +24,9 @@ app.get('/', async function (request, response) {
     return like.story
   })
 
-  const newArray = storyResponseJSON.data.map(story => {
-    story.liked = idsOfLikedStories.includes(story.id)
-    return story
-  })
-
   response.render('index.liquid', {
-    stories: newArray
+    stories: storyResponseJSON.data,
+    likes: idsOfLikedStories
   })
 })
 
