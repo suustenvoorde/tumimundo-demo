@@ -20,13 +20,9 @@ app.get('/', async function (request, response) {
   const likedStoriesResponse = await fetch('https://fdnd-agency.directus.app/items/tm_liked_stories?filter={"profile":127}')    
   const likedStoriesResponseJSON = await likedStoriesResponse.json()
 
-  const idsOfLikedStories = likedStoriesResponseJSON.data.map(like => {
-    return like.story
-  })
-
   response.render('index.liquid', {
     stories: storyResponseJSON.data,
-    likes: idsOfLikedStories
+    likes: likedStoriesResponseJSON.data
   })
 })
 

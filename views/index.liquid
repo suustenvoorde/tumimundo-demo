@@ -7,19 +7,104 @@
             <img src="https://fdnd-agency.directus.app/assets//{{ story.image }}">
             <p>{{ story.title }}</p>
 
-            {% if likes contains story.id %}
-              <form method="post" action="/unlike">
-                <button type="submit" name="story" value="{{ story.id }}">Unlike 💔</button>
+            {% assign is_liked = false %}
+        
+            {% for like in likes %}
+              {% if like.story == story.id %}
+                {% assign is_liked = true %}
+              {% endif %}
+            {% endfor %}
+            
+            {% if is_liked %}
+            <!-- Ideal state -->
+              <form method="post" action="/unlike" data-enhanced="form-{{ story.id }}">
+                <button type="submit" name="story" value="{{ story.id }}"><svg width="150px" height="150px" viewBox="-8.32 -8.32 32.64 32.64" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M1.24264 8.24264L8 15L14.7574 8.24264C15.553 7.44699 16 6.36786 16 5.24264V5.05234C16 2.8143 14.1857 1 11.9477 1C10.7166 1 9.55233 1.55959 8.78331 2.52086L8 3.5L7.21669 2.52086C6.44767 1.55959 5.28338 1 4.05234 1C1.8143 1 0 2.8143 0 5.05234V5.24264C0 6.36786 0.44699 7.44699 1.24264 8.24264Z" fill="#142151"></path> </g></svg></button>
               </form> 
             {% else %} 
-              <form method="post" action="/like">
-                <button type="submit" name="story" value="{{ story.id }}">Like ❤️</button>
+            <!-- Empty state -->
+              <form method="post" action="/like" data-enhanced="form-{{ story.id }}">
+                <button type="submit" name="story" value="{{ story.id }}"><svg width="150px" height="150px" viewBox="-8.32 -8.32 32.64 32.64" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M1.24264 8.24264L8 15L14.7574 8.24264C15.553 7.44699 16 6.36786 16 5.24264V5.05234C16 2.8143 14.1857 1 11.9477 1C10.7166 1 9.55233 1.55959 8.78331 2.52086L8 3.5L7.21669 2.52086C6.44767 1.55959 5.28338 1 4.05234 1C1.8143 1 0 2.8143 0 5.05234V5.24264C0 6.36786 0.44699 7.44699 1.24264 8.24264Z" fill="#ffffff"></path> </g></svg></button>
               </form> 
-            {% endif %}
-            
+            {% endif %}            
         </a>
       {% endfor %}
       </div>
     </div>
+
+    <script type="module">
+
+      // Als er ergens op de pagina een formulier wordt gesubmit..
+      // (We maken hier gebruik van Event Delegation)
+      //TODO: geen Event Delegation gebruiken
+
+      document.addEventListener('submit', async function(event) {
+
+        // Hou in een variabele bij welk formulier dat was
+        const form = event.target
+
+        // Als dit formulier geen data-enhanced attribuut heeft, doe dan niks speciaals (laat het formulier normaal versturen)
+        // Dit doen we, zodat we sommige formulieren op de pagina kunnen 'enhancen'
+        // Door ze bijvoorbeeld data-enhanced="true" of data-enhanced="formulier-3" te geven.
+        // Data attributen mag je zelf verzinnen: https://developer.mozilla.org/en-US/docs/Learn_web_development/Howto/Solve_HTML_problems/Use_data_attributes
+        if (!form.hasAttribute('data-enhanced')) {
+          return
+        }
+
+        // Voorkom de standaard submit van de browser
+        // Let op: hiermee overschrijven we de default Loading state van de browser...
+        event.preventDefault()
+
+        form.classList.add('loading')
+
+        // Verzamel alle formuliervelden van het formulier
+        //TODO: verschil met json.stringify() laten zien
+        let formData = new FormData(form)
+
+        // En voeg eventueel de name en value van de submit button toe aan die data
+        // https://developer.mozilla.org/en-US/docs/Web/API/SubmitEvent/submitter
+        if (event.submitter) {
+          console.log(event.submitter.name, event.submitter.value)
+          formData.append(event.submitter.name, event.submitter.value)
+        }
+
+        // Doe een fetch naar de server, net als hoe de browser dit normaal zou doen
+        // Gebruik daarvoor het action en method attribuut van het originele formulier
+        // Inclusief alle formuliervelden
+        const response = await fetch(form.action, {
+          method: form.method,
+          body: new URLSearchParams(formData)
+        })
+
+        // De server redirect op de normale manier, en geeft HTML terug
+        // (De server weet niet eens dat deze fetch via client-side JavaScript gebeurde)
+        const responseText = await response.text()
+
+
+        // Normaal zou de browser die HTML parsen en weergeven, maar daar moeten we nu zelf iets mee
+        // Parse de nieuwe HTML en maak hiervan een nieuw Document Object Model in het geheugen
+        const parser = new DOMParser()
+        const responseDOM = parser.parseFromString(responseText, 'text/html')
+
+        console.log(responseDOM)
+
+        // Zoek in die nieuwe HTML DOM onze nieuwe UI state op, die we via Liquid hebben klaargemaakt
+        // We gebruiken hiervoor het eerdere data-enhanced attribuut, zodat we weten waar we naar moeten zoeken
+        // In de nieuwe HTML zoeken we bijvoorbeeld naar data-enhanced="true" of data-enhanced="formulier-3"
+        // (Hierdoor kunnen we ook meerdere formulieren op dezelfde pagina gebruiken)
+        console.log(form.getAttribute('data-enhanced'))
+        const newState = responseDOM.querySelector('[data-enhanced="' + form.getAttribute('data-enhanced') + '"]')
+        
+        form.classList.remove('loading')
+
+        // Overschrijf ons formulier met de nieuwe HTML
+        // Hier wil je waarschijnlijk de Loading state vervangen door een Success state
+        if (form.action.includes("/like")) {
+          newState.classList.add('succes')
+        }
+
+        form.outerHTML = newState.outerHTML
+      })
+
+    </script>
 
 {% render 'partials/foot.liquid' %}

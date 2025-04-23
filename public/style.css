@@ -1,10 +1,9 @@
 * {
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
 }
 
 body {
+  margin: 0;
   background-color: #142151;
 }
 
@@ -16,27 +15,83 @@ body {
 }
 
 a {
-  flex-basis: 25%;
+  width: 90vw;
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
   background-color: white;
   margin-bottom: 50px;
-  margin-right: 50px;
   text-decoration: none;
+}
+
+@media (min-width: 50em){
+  a {
+    width: 45vw;
+  }
+}
+
+@media (min-width: 80em){
+  a {
+    width: 30vw;
+  }
 }
 
 a img {
   max-height: 7.5em;
+  aspect-ratio: 1/1;
+  object-fit: cover;
 }
 
 a p {
   color: black;
+  width: 100%;
+  margin: 0 1rem;
 }
 
 a form {
-  margin-right: 20px;
+  margin-right: 1rem;
+}
+
+/* like/unlike button */
+a form button svg {
+  width: 40px;
+  height: 40px;
+}
+
+.loading button {
+  animation: tilt-shaking 0.15s infinite;
+}
+
+.succes button::before, .succes button::after {
+  content: "💖";
+  position: absolute;
+  font-size: 16px;
+  animation: pop 0.6s ease-out forwards;
+  opacity: 0;
+}
+
+@keyframes pop {
+  0% {
+    transform: scale(0.5) translateY(0);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.2) translateY(-10px);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) translateY(-30px);
+    opacity: 0;
+  }
+}
+
+@keyframes tilt-shaking {
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(5deg); }
+  50% { transform: rotate(0eg); }
+  75% { transform: rotate(-5deg); }
+  100% { transform: rotate(0deg); }
 }
 
 /* detail page */
