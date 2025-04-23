@@ -35,8 +35,6 @@
 
       // Als er ergens op de pagina een formulier wordt gesubmit..
       // (We maken hier gebruik van Event Delegation)
-      //TODO: geen Event Delegation gebruiken
-
       document.addEventListener('submit', async function(event) {
 
         // Hou in een variabele bij welk formulier dat was
@@ -54,16 +52,15 @@
         // Let op: hiermee overschrijven we de default Loading state van de browser...
         event.preventDefault()
 
+        // Loading state toegevoegd
         form.classList.add('loading')
 
         // Verzamel alle formuliervelden van het formulier
-        //TODO: verschil met json.stringify() laten zien
         let formData = new FormData(form)
 
         // En voeg eventueel de name en value van de submit button toe aan die data
         // https://developer.mozilla.org/en-US/docs/Web/API/SubmitEvent/submitter
         if (event.submitter) {
-          console.log(event.submitter.name, event.submitter.value)
           formData.append(event.submitter.name, event.submitter.value)
         }
 
@@ -79,29 +76,27 @@
         // (De server weet niet eens dat deze fetch via client-side JavaScript gebeurde)
         const responseText = await response.text()
 
-
         // Normaal zou de browser die HTML parsen en weergeven, maar daar moeten we nu zelf iets mee
         // Parse de nieuwe HTML en maak hiervan een nieuw Document Object Model in het geheugen
         const parser = new DOMParser()
         const responseDOM = parser.parseFromString(responseText, 'text/html')
 
-        console.log(responseDOM)
-
         // Zoek in die nieuwe HTML DOM onze nieuwe UI state op, die we via Liquid hebben klaargemaakt
         // We gebruiken hiervoor het eerdere data-enhanced attribuut, zodat we weten waar we naar moeten zoeken
         // In de nieuwe HTML zoeken we bijvoorbeeld naar data-enhanced="true" of data-enhanced="formulier-3"
         // (Hierdoor kunnen we ook meerdere formulieren op dezelfde pagina gebruiken)
-        console.log(form.getAttribute('data-enhanced'))
         const newState = responseDOM.querySelector('[data-enhanced="' + form.getAttribute('data-enhanced') + '"]')
-        
+    
+        // Hier wil je waarschijnlijk de Loading state vervangen door een Success state
+        // Loading state verwijderen
         form.classList.remove('loading')
 
-        // Overschrijf ons formulier met de nieuwe HTML
-        // Hier wil je waarschijnlijk de Loading state vervangen door een Success state
+        // Succes state
         if (form.action.includes("/like")) {
           newState.classList.add('succes')
         }
 
+        // Overschrijf ons formulier met de nieuwe HTML
         form.outerHTML = newState.outerHTML
       })
 
