@@ -1,7 +1,15 @@
 {% render 'partials/head.liquid' %}
 
     <div id="stories">
-      <div>
+      <div class="liked">
+        {%for like in likes%}
+          <a href="/stories/{{like.story}}">
+              <p>{{ like.story }}</p>         
+          </a>
+        {% endfor %}
+      </div>
+
+      <div class="all-stories">
       {%for story in stories%}
         <a href="/stories/{{story.id}}">
             <img src="https://fdnd-agency.directus.app/assets//{{ story.image }}">
@@ -35,6 +43,7 @@
 
       // Als er ergens op de pagina een formulier wordt gesubmit..
       // (We maken hier gebruik van Event Delegation)
+
       document.addEventListener('submit', async function(event) {
 
         // Hou in een variabele bij welk formulier dat was
@@ -86,7 +95,9 @@
         // In de nieuwe HTML zoeken we bijvoorbeeld naar data-enhanced="true" of data-enhanced="formulier-3"
         // (Hierdoor kunnen we ook meerdere formulieren op dezelfde pagina gebruiken)
         const newState = responseDOM.querySelector('[data-enhanced="' + form.getAttribute('data-enhanced') + '"]')
-    
+        const newLike = responseDOM.querySelector('.liked a')
+
+
         // Hier wil je waarschijnlijk de Loading state vervangen door een Success state
         // Loading state verwijderen
         form.classList.remove('loading')
@@ -98,6 +109,8 @@
 
         // Overschrijf ons formulier met de nieuwe HTML
         form.outerHTML = newState.outerHTML
+        let newLikes = document.querySelector('.liked')
+        newLikes.insertAdjacentElement("beforeend", newLike);
       })
 
     </script>
